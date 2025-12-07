@@ -33,27 +33,48 @@ apt update && apt upgrade -y
 echo -e "${GREEN}✓ System updated${NC}"
 echo ""
 
-echo "Step 2: Installing Docker..."
+echo "Step 2: Installing required packages..."
+apt install -y curl wget ca-certificates gnupg lsb-release
+echo -e "${GREEN}✓ Required packages installed${NC}"
+echo ""
+
+echo "Step 3: Installing Docker..."
 if ! command -v docker &> /dev/null; then
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
-    rm get-docker.sh
-    echo -e "${GREEN}✓ Docker installed${NC}"
+    # Remove old versions
+    apt remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
+
+    # Add Docker's official GPG key
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
+
+    # Add the repository
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    # Install Docker Engine and Compose plugin
+    apt update
+    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    echo -e "${GREEN}✓ Docker and Docker Compose installed${NC}"
 else
     echo -e "${YELLOW}✓ Docker already installed${NC}"
+    # Ensure compose plugin is installed
+    if ! docker compose version &> /dev/null; then
+        apt install -y docker-compose-plugin
+        echo -e "${GREEN}✓ Docker Compose plugin installed${NC}"
+    fi
 fi
 echo ""
 
-echo "Step 3: Installing Docker Compose..."
-if ! command -v docker-compose &> /dev/null; then
-    apt install docker-compose -y
-    echo -e "${GREEN}✓ Docker Compose installed${NC}"
-else
-    echo -e "${YELLOW}✓ Docker Compose already installed${NC}"
-fi
+echo "Step 4: Verifying Docker installation..."
+docker --version
+docker compose version
+echo -e "${GREEN}✓ Docker is ready${NC}"
 echo ""
 
-echo "Step 4: Installing Git..."
+echo "Step 5: Installing Git..."
 if ! command -v git &> /dev/null; then
     apt install git -y
     echo -e "${GREEN}✓ Git installed${NC}"
@@ -62,7 +83,7 @@ else
 fi
 echo ""
 
-echo "Step 5: Cloning Jitsi Meet repository..."
+echo "Step 6: Cloning Jitsi Meet repository..."
 cd /opt
 if [ -d "zvonilka" ]; then
     echo -e "${YELLOW}✓ Repository already exists, pulling latest changes${NC}"
@@ -75,7 +96,7 @@ else
 fi
 echo ""
 
-echo "Step 6: Configuring environment variables..."
+echo "Step 7: Configuring environment variables..."
 cd docker
 
 if [ ! -f ".env" ]; then
@@ -101,7 +122,7 @@ else
 fi
 echo ""
 
-echo "Step 7: Configuring firewall..."
+echo "Step 8: Configuring firewall..."
 if command -v ufw &> /dev/null; then
     ufw --force enable
     ufw allow 22/tcp
@@ -114,10 +135,10 @@ else
 fi
 echo ""
 
-echo "Step 8: Starting Jitsi Meet..."
-docker-compose down 2>/dev/null || true
-docker-compose pull
-docker-compose up -d
+echo "Step 9: Starting Jitsi Meet..."
+docker compose down 2>/dev/null || true
+docker compose pull
+docker compose up -d
 
 # Wait for services to start
 echo "Waiting for services to start..."
@@ -133,12 +154,12 @@ echo -e "${GREEN}http://${SERVER_IP}${NC}"
 echo ""
 echo "To check status:"
 echo "  cd /opt/zvonilka/docker"
-echo "  docker-compose ps"
+echo "  docker compose ps"
 echo ""
 echo "To view logs:"
-echo "  docker-compose logs -f"
+echo "  docker compose logs -f"
 echo ""
 echo "To stop services:"
-echo "  docker-compose down"
+echo "  docker compose down"
 echo ""
 echo "=========================================="
