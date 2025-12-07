@@ -1,0 +1,35 @@
+- name: Install web dependencies
+  apt:
+    name: 
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+- name: Copy Nginx configuration
+  template:
+    src: ../../../../configs/nginx/jitsi.conf
+    dest: /etc/nginx/sites-available/jitsi.conf
+  notify: Reload nginx
+
+- name: Enable Nginx configuration
+  command: nginx -s reload
+  args:
+    warn: false
+
+- name: Create symlink for Nginx site
+  file:
+    src: /etc/nginx/sites-available/jitsi.conf
+    dest: /etc/nginx/sites-enabled/jitsi.conf
+    state: link
+  notify: Reload nginx
+
+- name: Obtain SSL certificates
+  command: certbot --nginx -d yourdomain.com
+  args:
+    creates: /etc/letsencrypt/live/yourdomain.com/fullchain.pem
+
+- name: Reload nginx
+  service:
+    name: nginx
+    state: reloaded

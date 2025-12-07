@@ -1,0 +1,37 @@
+- name: Install Jitsi Video Bridge
+  apt:
+    name: jitsi-videobridge2
+    state: present
+
+- name: Configure Jitsi Video Bridge
+  template:
+    src: jvb.conf.j2
+    dest: /etc/jitsi/videobridge/jvb.conf
+  notify:
+    - Restart Jitsi Video Bridge
+
+- name: Ensure Jitsi Video Bridge is running
+  service:
+    name: jitsi-videobridge2
+    state: started
+    enabled: true
+
+- name: Set up firewall rules for Jitsi Video Bridge
+  ufw:
+    rule: allow
+    name: 'Jitsi Video Bridge'
+    port: 10000/udp
+
+- name: Ensure Jitsi Video Bridge logs directory exists
+  file:
+    path: /var/log/jitsi
+    state: directory
+    owner: jvb
+    group: jvb
+    mode: '0755'
+
+handlers:
+  - name: Restart Jitsi Video Bridge
+    service:
+      name: jitsi-videobridge2
+      state: restarted

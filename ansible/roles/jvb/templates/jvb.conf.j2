@@ -1,0 +1,40 @@
+# Jitsi Video Bridge Configuration Template
+
+# JVB configuration file for Jitsi Meet
+# This file is a Jinja2 template that allows for dynamic configuration.
+
+# General settings
+videobridge {
+    # The host name of the JVB
+    host = "{{ jvb_host }}"
+    
+    # The port for the JVB to listen on
+    port = {{ jvb_port }}
+
+    # The secret used for authentication
+    secret = "{{ jvb_secret }}"
+
+    # The public address of the JVB
+    public_address = "{{ jvb_public_address }}"
+
+    # The region for the JVB
+    region = "{{ jvb_region }}"
+}
+
+# Logging settings
+logging {
+    # The log level for the JVB
+    level = "{{ jvb_log_level }}"
+    
+    # The log file path
+    file = "{{ jvb_log_file }}"
+}
+
+# Health check settings
+healthcheck {
+    # Enable health checks
+    enabled = {{ jvb_healthcheck_enabled }}
+
+    # The interval for health checks
+    interval = {{ jvb_healthcheck_interval }}
+}

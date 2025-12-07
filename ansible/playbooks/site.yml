@@ -1,0 +1,51 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - nginx
+          - prosody
+          - jicofo
+          - jitsi-videobridge2
+        state: present
+
+    - name: Start and enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Start and enable prosody
+      service:
+        name: prosody
+        state: started
+        enabled: true
+
+    - name: Start and enable jicofo
+      service:
+        name: jicofo
+        state: started
+        enabled: true
+
+    - name: Start and enable jitsi-videobridge2
+      service:
+        name: jitsi-videobridge2
+        state: started
+        enabled: true
+
+    - name: Configure nginx
+      template:
+        src: nginx/jitsi.conf.j2
+        dest: /etc/nginx/sites-available/jitsi.conf
+      notify:
+        - Reload nginx
+
+    - name: Enable jitsi site
+      command: nginx -s reload
+
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded

@@ -1,0 +1,79 @@
+# Prosody configuration template for Jitsi Meet
+
+modules_enabled = {
+    "roster"; 
+    "version"; 
+    "uptime"; 
+    "ping"; 
+    "admin_muc"; 
+    "component"; 
+    "http_file_upload"; 
+    "websocket"; 
+    "conference"; 
+    "muc"; 
+    "message_carbon"; 
+    "mod_mam"; 
+    "mod_vcard"; 
+    "mod_http_file_upload"; 
+    "mod_csi"; 
+    "mod_muc_size"; 
+    "mod_mam"; 
+}
+
+admins = { "focus@auth.{{ domain }}", "jvb@auth.{{ domain }}" }
+
+allow_empty_token = false
+
+cross_domain_bosh = true
+
+bosh_max_inactivity = 300
+
+modules_disabled = {
+    "blocklist"; 
+    "private"; 
+    "private_messages"; 
+}
+
+log_level = 2
+
+consider_bosh_secure = true
+
+VirtualHost "{{ domain }}"
+    authentication = "internal_plain"
+    modules_enabled = {
+        "conference"; 
+        "muc"; 
+        "http_file_upload"; 
+        "websocket"; 
+    }
+
+Component "conference.{{ domain }}" "muc"
+    storage = "memory"
+    muc_room_default_public_jids = true
+
+Component "focus.{{ domain }}" "client_proxy"
+    component_secret = "{{ focus_secret }}"
+
+Component "jitsi-videobridge.{{ domain }}" "component"
+    component_secret = "{{ jvb_secret }}"
+
+Component "internal.auth.{{ domain }}" "muc"
+    storage = "memory"
+    muc_room_default_public_jids = true
+
+VirtualHost "auth.{{ domain }}"
+    modules_enabled = {
+        "auth_internal"; 
+    }
+    authentication = "internal_plain"
+
+VirtualHost "guest.{{ domain }}"
+    authentication = "anonymous"
+    modules_enabled = {
+        "muc"; 
+        "http_file_upload"; 
+    }
+    muc_room_default_public_jids = true
+
+log_file = "/var/log/prosody/prosody.log"
+error_log_file = "/var/log/prosody/prosody.err"

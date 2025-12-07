@@ -1,0 +1,81 @@
+version: '3'
+
+services:
+  prosody:
+    image: jitsi/prosody:stable-9584
+    restart: unless-stopped
+    networks:
+      - jitsi-net
+    volumes:
+      - prosody-config:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - XMPP_MODULES=mod_mam
+      - PROSODY_AUTH=internal_plain
+
+  jicofo:
+    image: jitsi/jicofo:stable-9584
+    restart: unless-stopped
+    networks:
+      - jitsi-net
+    volumes:
+      - jicofo-config:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_BREWERY=muc.meet.jitsi
+      - JICOFO_AUTH_USER=focus
+      - JICOFO_AUTH_PASSWORD=jicofo_secure_password_123
+    depends_on:
+      - prosody
+
+  jvb:
+    image: jitsi/jvb:stable-9584
+    restart: unless-stopped
+    networks:
+      - jitsi-net
+    ports:
+      - "10000:10000/udp"
+    volumes:
+      - jvb-config:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - JVB_AUTH_USER=jvb
+      - JVB_AUTH_PASSWORD=jvb_secure_password_456
+      - JVB_PORT=10000
+      - JVB_TCP_HARVESTER_PORT=0
+    depends_on:
+      - prosody
+
+  web:
+    image: jitsi/web:stable-9584
+    restart: unless-stopped
+    networks:
+      - jitsi-net
+    ports:
+      - "8000:80"
+      - "8443:443"
+    volumes:
+      - web-config:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - ENABLE_AUTH=0
+      - JWT_SECRET=jwt_secret_token_789abc
+    depends_on:
+      - prosody
+
+networks:
+  jitsi-net:
+    driver: bridge
+
+volumes:
+  prosody-config:
+  jicofo-config:
+  jvb-config:
+  web-config:

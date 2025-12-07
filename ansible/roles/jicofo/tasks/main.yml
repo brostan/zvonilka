@@ -1,0 +1,22 @@
+- name: Install Jicofo
+  apt:
+    name: jicofo
+    state: present
+
+- name: Configure Jicofo
+  template:
+    src: sip-communicator.properties.j2
+    dest: /etc/jitsi/jicofo/sip-communicator.properties
+  notify: Restart Jicofo
+
+- name: Ensure Jicofo is running
+  service:
+    name: jicofo
+    state: started
+    enabled: yes
+
+- name: Set up Jicofo configuration
+  lineinfile:
+    path: /etc/jitsi/jicofo/sip-communicator.properties
+    regexp: '^org.jitsi.jicofo.BRIDGE_MUC=conference.'
+    line: 'org.jitsi.jicofo.BRIDGE_MUC=conference.{{ domain }}'

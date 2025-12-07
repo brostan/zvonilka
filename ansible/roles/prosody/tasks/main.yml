@@ -1,0 +1,26 @@
+- name: Install Prosody
+  apt:
+    name: prosody
+    state: present
+
+- name: Configure Prosody
+  template:
+    src: prosody.cfg.lua.j2
+    dest: /etc/prosody/prosody.cfg.lua
+  notify: Restart Prosody
+
+- name: Ensure Prosody is running
+  service:
+    name: prosody
+    state: started
+    enabled: true
+
+- name: Create Prosody user
+  command: prosodyctl register {{ prosody_user }} {{ prosody_domain }} {{ prosody_password }}
+  when: prosody_user is defined and prosody_domain is defined and prosody_password is defined
+
+- name: Restart Prosody
+  service:
+    name: prosody
+    state: restarted
+  when: ansible_facts['os_family'] == 'Debian'
