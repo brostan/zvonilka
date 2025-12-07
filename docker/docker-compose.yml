@@ -50,6 +50,7 @@ services:
     environment:
       - XMPP_DOMAIN=${XMPP_DOMAIN}
       - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_SERVER=prosody
       - JVB_AUTH_USER=${JVB_AUTH_USER}
       - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
       - JVB_PORT=${JVB_PORT}
