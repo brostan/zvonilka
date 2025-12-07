@@ -1,0 +1,31 @@
+# Environment files
+.env
+*.env
+!.env.example
+
+# Docker volumes
+docker/volumes/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry

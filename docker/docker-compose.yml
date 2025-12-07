@@ -9,12 +9,17 @@ services:
     volumes:
       - prosody-config:/config
     environment:
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_MUC_DOMAIN=muc.meet.jitsi
-      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
+      - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
       - XMPP_MODULES=mod_mam
       - PROSODY_AUTH=internal_plain
+      - TZ=${TZ}
+      - PUBLIC_URL=https://${JITSI_DOMAIN}
+      - ENABLE_AUTH=${ENABLE_AUTH}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
 
   jicofo:
     image: jitsi/jicofo:stable-9584
@@ -24,11 +29,12 @@ services:
     volumes:
       - jicofo-config:/config
     environment:
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_BREWERY=muc.meet.jitsi
-      - JICOFO_AUTH_USER=focus
-      - JICOFO_AUTH_PASSWORD=jicofo_secure_password_123
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_BREWERY=${XMPP_MUC_DOMAIN}
+      - JICOFO_AUTH_USER=${JICOFO_AUTH_USER}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - TZ=${TZ}
     depends_on:
       - prosody
 
@@ -38,16 +44,18 @@ services:
     networks:
       - jitsi-net
     ports:
-      - "10000:10000/udp"
+      - "${JVB_PORT}:${JVB_PORT}/udp"
     volumes:
       - jvb-config:/config
     environment:
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - JVB_AUTH_USER=jvb
-      - JVB_AUTH_PASSWORD=jvb_secure_password_456
-      - JVB_PORT=10000
-      - JVB_TCP_HARVESTER_PORT=0
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - JVB_AUTH_USER=${JVB_AUTH_USER}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+      - JVB_PORT=${JVB_PORT}
+      - JVB_TCP_HARVESTER_PORT=${JVB_TCP_HARVESTER_PORT}
+      - DOCKER_HOST_ADDRESS=${DOCKER_HOST_ADDRESS}
+      - TZ=${TZ}
     depends_on:
       - prosody
 
@@ -57,16 +65,18 @@ services:
     networks:
       - jitsi-net
     ports:
-      - "8000:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - web-config:/config
     environment:
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_MUC_DOMAIN=muc.meet.jitsi
-      - ENABLE_AUTH=0
-      - JWT_SECRET=jwt_secret_token_789abc
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
+      - ENABLE_AUTH=${ENABLE_AUTH}
+      - JWT_SECRET=${JWT_SECRET}
+      - PUBLIC_URL=https://${JITSI_DOMAIN}
+      - TZ=${TZ}
     depends_on:
       - prosody
 
