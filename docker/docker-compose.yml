@@ -70,14 +70,17 @@ services:
       - "443:443"
     volumes:
       - web-config:/config
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       - XMPP_DOMAIN=${XMPP_DOMAIN}
       - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
       - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
+      - XMPP_SERVER=prosody
       - ENABLE_AUTH=${ENABLE_AUTH}
       - JWT_SECRET=${JWT_SECRET}
       - PUBLIC_URL=https://${JITSI_DOMAIN}
       - TZ=${TZ}
+      - ENABLE_HTTP_REDIRECT=1
     depends_on:
       - prosody
 
